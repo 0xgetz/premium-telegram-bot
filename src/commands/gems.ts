@@ -11,6 +11,8 @@ import {
   EVM_CHAINS,
   Pair,
 } from '../services/gemService.js';
+import { checkSecurity } from '../services/securityService.js';
+import { analyze, formatAnalysis } from '../services/analysisService.js';
 
 const md = { parse_mode: 'Markdown' as const, link_preview_options: { is_disabled: true } };
 const FREE_MAX_WATCH = 3;
@@ -59,7 +61,69 @@ export function registerGemCommands(bot: Bot): void {
       if (!pair) {
         return ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ No EVM token found for that query.');
       }
-      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, formatPair(pair), md);
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, formatPair(pair) + '\n\n🔬 Run `/scan ' + pair.baseToken.address + '` for safety + buy/hold analysis.', md);
+    } catch (e) {
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ ' + (e as Error).message);
+    }
+  });
+
+  // /scan <address> [chain] — full safety + buy/hold analysis
+  bot.command('scan', async (ctx) => {
+    const u = ctx.from;
+    if (!u) return;
+    const parts = ctx.match?.toString().trim().split(/\s+/) ?? [];
+    const addr = parts[0];
+    if (!addr || !isEvmAddress(addr)) {
+      return ctx.reply('🔬 Usage: `/scan 0x<token address> [chain]`\nSafety + buy/hold analysis.', md);
+    }
+    const loading = await ctx.reply('🔬 Scanning contract, market & narrative…');
+    try {
+      const pair = await fetchToken(addr, parts[1]);
+      if (!pair) {
+        return ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ Token not found on supported EVM DEXes.');
+      }
+      const sec = await checkSecurity(pair.baseToken.address, pair.chainId);
+      const analysis = analyze(pair, sec);
+      const header =
+        `💎 *${pair.baseToken.symbol}* — ${pair.baseToken.name}\n` +
+        `\`${pair.chainId}\` · $${pair.priceUsd ?? '—'} · liq ${(((pair.liquidity?.usd ?? 0)) / 1000).toFixed(0)}k\n` +
+        `Checks: ${sec.sources.join(' + ') || 'limited'}\n\n`;
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, header + formatAnalysis(analysis), {
+        ...md,
+      });
+    } catch (e) {
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ ' + (e as Error).message);
+    }
+  });
+
+  // /honeypot <address> [chain] — quick can-I-sell check
+  bot.command('honeypot', async (ctx) => {
+    const parts = ctx.match?.toString().trim().split(/\s+/) ?? [];
+    const addr = parts[0];
+    if (!addr || !isEvmAddress(addr)) return ctx.reply('🍯 Usage: `/honeypot 0x<address> [chain]`', md);
+    const loading = await ctx.reply('🍯 Simulating buy & sell…');
+    try {
+      const pair = await fetchToken(addr, parts[1]);
+      const chain = pair?.chainId ?? parts[1] ?? 'ethereum';
+      const sec = await checkSecurity(addr, chain);
+      if (sec.isHoneypot === null && sec.sources.length === 0) {
+        return ctx.api.editMessageText(ctx.chat.id, loading.message_id, '⚠️ Could not verify on this chain. Be careful.');
+      }
+      const verdict = sec.isHoneypot === true
+        ? '🚨 *HONEYPOT* — you likely CANNOT sell!'
+        : sec.isHoneypot === false
+          ? '✅ *Not a honeypot* (sellable in simulation)'
+          : '⚠️ Inconclusive';
+      const lines = [
+        verdict,
+        sec.honeypotReason ? `Reason: ${sec.honeypotReason}` : '',
+        `Buy tax: ${sec.buyTax ?? '—'}% · Sell tax: ${sec.sellTax ?? '—'}%`,
+        `Verified: ${sec.openSource === null ? '—' : sec.openSource ? 'yes' : 'NO ⚠️'} · Proxy: ${sec.isProxy ? 'yes ⚠️' : 'no'}`,
+        sec.topHolderPct !== null ? `Top holder: ${sec.topHolderPct.toFixed(0)}%` : '',
+        `Source: ${sec.sources.join(' + ') || 'n/a'}`,
+        '\n_Not financial advice. DYOR._',
+      ].filter(Boolean);
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, lines.join('\n'), md);
     } catch (e) {
       await ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ ' + (e as Error).message);
     }

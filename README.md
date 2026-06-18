@@ -26,6 +26,23 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 - 💥 **Self-destructing messages** — `/sd 10 secret` auto-deletes after N seconds.
 - 🔳 **Offline QR codes** — `/qr <text>` renders locally, no third-party service.
 - 📝 **Cross-device notes** — `/save` / `/notes`, with premium full-text `/find`.
+- ⬇️ **Media downloaders** — `/mp3 <url>` and `/video <url>` via [yt-dlp] (size-capped to Telegram's limit). Only for content you have the right to download.
+- 💎 **EVM gems tracker** — `/gem` / `/gems` / `/findtoken`: live price, liquidity, volume, FDV, age via free [DexScreener] API.
+- 🛡 **Honeypot & scam detection** — `/honeypot <address>` simulates a real buy & sell ([honeypot.is]) and reports buy/sell tax, verification, proxy, top-holder %, plus [GoPlus] privileges (mintable, hidden owner, blacklist, pausable).
+- 🔬 **Buy/hold analysis** — `/scan <address>` scores **Safety**, **Momentum**, and **Narrative** (socials, trending, volume surge, holders), then gives a verdict + suggested horizon (scalp hours vs swing days). *Educational only — not financial advice.*
+
+---
+
+## ⚙️ Prerequisites for downloaders
+
+`/mp3` and `/video` shell out to **yt-dlp** + **ffmpeg** — install them on the host:
+
+```bash
+pip install -U yt-dlp       # or: brew install yt-dlp
+sudo apt install ffmpeg     # or: brew install ffmpeg
+```
+
+The gems tracker and safety checks need **no install and no API key** (public DexScreener / honeypot.is / GoPlus endpoints).
 
 ---
 
@@ -37,6 +54,7 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 **Productivity:** `/todo` `/poll` `/countdown` `/pomodoro`
 **Downloaders (yt-dlp):** `/mp3` `/video`
 **EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems`
+**Token safety (honeypot.is + GoPlus):** `/honeypot` `/scan` (safety + buy/hold analysis)
 **Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price alerts) · recurring reminders
 
 Send any command with no arguments to see its usage. `/tools` lists everything.
@@ -128,3 +146,5 @@ MIT — see [LICENSE](./LICENSE).
 [@BotFather]: https://t.me/BotFather
 [yt-dlp]: https://github.com/yt-dlp/yt-dlp
 [DexScreener]: https://docs.dexscreener.com/api/reference
+[honeypot.is]: https://honeypot.is
+[GoPlus]: https://docs.gopluslabs.io/reference/api-overview

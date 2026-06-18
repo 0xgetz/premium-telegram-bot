@@ -63,7 +63,7 @@ export function registerBasicCommands(bot: Bot): void {
         '/mp3 <url> · /video <url>',
         '',
         '*💎 EVM gems tracker*',
-        '/gem <address|symbol> · /findtoken <q> · /gems (trending)',
+        '/gem <address|symbol> · /scan <address> (safety + buy/hold) · /honeypot <address> · /findtoken <q> · /gems (trending)',
         '',
         '*⏰ Core*',
         '/gen · /remind · /reminders · /qr · /sd · /save · /notes',

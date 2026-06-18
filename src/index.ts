@@ -52,6 +52,8 @@ async function main(): Promise<void> {
     { command: 'mp3', description: 'Download audio from a link' },
     { command: 'video', description: 'Download a video from a link' },
     { command: 'gem', description: 'EVM token stats (gems tracker)' },
+    { command: 'scan', description: 'Honeypot + buy/hold analysis' },
+    { command: 'honeypot', description: 'Quick can-I-sell check' },
     { command: 'gems', description: 'Trending EVM gems' },
     { command: 'remind', description: 'Set a reminder (natural language)' },
     { command: 'todo', description: 'To-do list' },

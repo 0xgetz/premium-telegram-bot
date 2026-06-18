@@ -22,7 +22,20 @@ export interface Pair {
   fdv?: number;
   marketCap?: number;
   pairCreatedAt?: number;
+  info?: {
+    websites?: { url: string }[];
+    socials?: { type: string; url: string }[];
+  };
+  boosts?: { active?: number };
 }
+
+/** EVM chain name → numeric chain ID (for honeypot.is / GoPlus). */
+export const CHAIN_IDS: Record<string, number> = {
+  ethereum: 1, bsc: 56, base: 8453, polygon: 137, arbitrum: 42161, optimism: 10,
+  avalanche: 43114, fantom: 250, cronos: 25, pulsechain: 369, linea: 59144,
+  scroll: 534352, zksync: 324, mantle: 5000, blast: 81457, celo: 42220,
+  gnosis: 100, metis: 1088, moonbeam: 1284, moonriver: 1285,
+};
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url, { headers: { accept: 'application/json' } });
