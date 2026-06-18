@@ -1,5 +1,5 @@
 import { Bot, Context } from 'grammy';
-import { ensureUser, isPremium, FREE_DAILY_LIMIT } from '../services/userService.js';
+import { ensureUser } from '../services/userService.js';
 
 export function registerBasicCommands(bot: Bot): void {
   bot.command('start', async (ctx: Context) => {
@@ -7,17 +7,24 @@ export function registerBasicCommands(bot: Bot): void {
     if (u) ensureUser(u.id, u.username);
     await ctx.reply(
       [
-        '👋 *Welcome!*',
+        '👋 *Welcome!* This bot is *100% free & open-source* — no limits, no paywall.',
         '',
-        'This bot generates catchy marketing copy for any topic.',
+        '*✨ Generator*',
+        '/gen <topic> — generate catchy marketing copy',
+        '_Tip: works inline too — type_ `@thisbot your topic` _in any chat!_',
         '',
-        '*Commands:*',
-        '/gen <topic> — generate copy',
-        '/status — see your plan & remaining uses',
-        '/upgrade — unlock unlimited + premium variants',
-        '/help — show this message',
+        '*⏰ Reminders* (natural language)',
+        '/remind in 2 hours drink water',
+        '/reminders — manage them',
         '',
-        `Free plan: *${FREE_DAILY_LIMIT} generations/day*. Premium: *unlimited*.`,
+        '*🧰 Handy tools*',
+        '/qr <text> — generate a QR code',
+        '/sd <seconds> <msg> — self-destructing message',
+        '',
+        '*📝 Personal notes* (synced across your devices)',
+        '/save <anything> · /notes',
+        '',
+        '/help — show this again',
       ].join('\n'),
       { parse_mode: 'Markdown' },
     );
@@ -26,11 +33,15 @@ export function registerBasicCommands(bot: Bot): void {
   bot.command('help', (ctx) =>
     ctx.reply(
       [
-        '*How to use:*',
-        '`/gen launching my coffee app`',
+        '*Commands*',
+        '/gen <topic> — marketing copy (also inline: `@thisbot topic`)',
+        '/remind <when> <what> — e.g. `/remind tomorrow at 9am standup`',
+        '/reminders — list & delete reminders',
+        '/qr <text> — QR code image',
+        '/sd <seconds> <msg> — self-destructing message',
+        '/save <text> — save a note · /notes — view notes',
         '',
-        '/status — your plan',
-        '/upgrade — go premium',
+        'Everything is free and unlimited. 💚',
       ].join('\n'),
       { parse_mode: 'Markdown' },
     ),
@@ -40,19 +51,8 @@ export function registerBasicCommands(bot: Bot): void {
     const u = ctx.from;
     if (!u) return;
     const user = ensureUser(u.id, u.username);
-    const premium = isPremium(user);
-    if (premium) {
-      const until = user.premium_until
-        ? new Date(user.premium_until).toISOString().slice(0, 10)
-        : 'lifetime';
-      return ctx.reply(`✨ *Premium active* (until ${until}). Unlimited usage.`, {
-        parse_mode: 'Markdown',
-      });
-    }
-    const now = Date.now();
-    const used = now >= user.daily_reset_at ? 0 : user.daily_used;
     return ctx.reply(
-      `🆓 *Free plan* — ${Math.max(0, FREE_DAILY_LIMIT - used)}/${FREE_DAILY_LIMIT} generations left today.\nUse /upgrade for unlimited access.`,
+      `💚 *Free plan — unlimited.*\nYou've used the bot *${user.usage_count}* times. Thanks for being here!`,
       { parse_mode: 'Markdown' },
     );
   });

@@ -1,36 +1,38 @@
 {
-  "name": "premium-telegram-bot",
-  "version": "1.0.0",
-  "description": "A production-ready Telegram bot with a free tier and paid premium features. Monetized via Telegram Stars and Stripe subscriptions.",
+  "name": "free-telegram-bot",
+  "version": "2.0.0",
+  "description": "A 100% free, open-source Telegram bot with rare features most bots don't have: inline mode, natural-language reminders, self-destructing messages, offline QR codes, and personal cross-device notes.",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\""
+    "start": "node dist/index.js"
   },
   "keywords": [
     "telegram",
     "bot",
-    "saas",
-    "subscription",
-    "stripe",
-    "telegram-stars",
-    "typescript"
+    "free",
+    "open-source",
+    "inline-mode",
+    "reminders",
+    "qrcode",
+    "typescript",
+    "grammy"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "better-sqlite3": "^11.3.0",
+    "chrono-node": "^2.7.7",
     "dotenv": "^16.4.5",
     "grammy": "^1.30.0",
-    "stripe": "^16.12.0"
+    "qrcode": "^1.5.4"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.5.0",
+    "@types/qrcode": "^1.5.5",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   },
