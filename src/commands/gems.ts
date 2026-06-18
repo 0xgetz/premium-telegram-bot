@@ -13,13 +13,14 @@ import {
 } from '../services/gemService.js';
 import { checkSecurity } from '../services/securityService.js';
 import { analyze, formatAnalysis } from '../services/analysisService.js';
+import { scanTrending, formatScannedGem } from '../services/gemScanService.js';
 
 const md = { parse_mode: 'Markdown' as const, link_preview_options: { is_disabled: true } };
 const FREE_MAX_WATCH = 3;
 
 const addWatch = db.prepare(
-  `INSERT INTO watchlist (telegram_id, chat_id, chain, address, symbol, ref_price, created_at)
-   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  `INSERT INTO watchlist (telegram_id, chat_id, chain, address, symbol, ref_price, ref_volume, ref_holders, narr_alert_at, created_at)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
 );
 const listWatch = db.prepare(`SELECT * FROM watchlist WHERE telegram_id = ? ORDER BY created_at`);
 const countWatch = db.prepare(`SELECT COUNT(*) AS n FROM watchlist WHERE telegram_id = ?`);
@@ -29,10 +30,14 @@ const existsWatch = db.prepare(
 const delWatch = db.prepare(`DELETE FROM watchlist WHERE id = ? AND telegram_id = ?`);
 const allWatch = db.prepare(`SELECT * FROM watchlist`);
 const setRef = db.prepare(`UPDATE watchlist SET ref_price = ? WHERE id = ?`);
+const setNarrBaseline = db.prepare(
+  `UPDATE watchlist SET ref_volume = ?, ref_holders = ?, narr_alert_at = ? WHERE id = ?`,
+);
 
 interface WatchRow {
   id: number; telegram_id: number; chat_id: number; chain: string;
   address: string; symbol: string | null; ref_price: number;
+  ref_volume: number; ref_holders: number; narr_alert_at: number;
 }
 
 const isEvmAddress = (s: string) => /^0x[a-fA-F0-9]{40}$/.test(s);
@@ -161,6 +166,35 @@ export function registerGemCommands(bot: Bot): void {
     }
   });
 
+  // /safegems — auto-scan trending gems and show ONLY those that pass safety
+  bot.command('safegems', async (ctx) => {
+    const loading = await ctx.reply('🛡 Auto-scanning trending gems for safety…');
+    try {
+      const { passed, scanned } = await scanTrending();
+      if (!scanned) {
+        return ctx.api.editMessageText(ctx.chat.id, loading.message_id, 'No trending gems right now, try later.');
+      }
+      if (!passed.length) {
+        return ctx.api.editMessageText(
+          ctx.chat.id, loading.message_id,
+          `🛡 Scanned ${scanned} trending tokens — *none* cleared the safety filter ` +
+            `(min Safety ${config.gemScanMinSafety}/100) right now.\nMarkets are risky; try again later.`,
+          md,
+        );
+      }
+      const text = passed.slice(0, 6).map(formatScannedGem).join('\n\n');
+      await ctx.api.editMessageText(
+        ctx.chat.id, loading.message_id,
+        `🛡 *Safety-filtered trending gems*\n` +
+          `_Passed ${passed.length}/${scanned} · min Safety ${config.gemScanMinSafety}/100_\n\n` +
+          `${text}\n\n🔬 Run \`/scan <address>\` for the full report.\n_Not financial advice — DYOR._`,
+        md,
+      );
+    } catch (e) {
+      await ctx.api.editMessageText(ctx.chat.id, loading.message_id, '❌ ' + (e as Error).message);
+    }
+  });
+
   // /watch <address> [chain] — premium price alerts
   bot.command('watch', async (ctx) => {
     const u = ctx.from;
@@ -176,8 +210,17 @@ export function registerGemCommands(bot: Bot): void {
 
     const pair = await fetchToken(addr, parts[1]);
     if (!pair) return ctx.reply('❌ Token not found.');
-    addWatch.run(u.id, ctx.chat.id, pair.chainId, pair.baseToken.address, pair.baseToken.symbol, Number(pair.priceUsd ?? 0), Date.now());
-    return ctx.reply(`👀 Watching *${pair.baseToken.symbol}*. I'll alert you on ±${config.gemAlertPercent}% moves.`, md);
+    // Capture a narrative baseline (24h volume + holders) so we can detect "narasi naik" surges.
+    const sec = await checkSecurity(pair.baseToken.address, pair.chainId).catch(() => null);
+    addWatch.run(
+      u.id, ctx.chat.id, pair.chainId, pair.baseToken.address, pair.baseToken.symbol,
+      Number(pair.priceUsd ?? 0), Number(pair.volume?.h24 ?? 0), Number(sec?.holders ?? 0), Date.now(),
+    );
+    return ctx.reply(
+      `👀 Watching *${pair.baseToken.symbol}*. I'll alert you on ±${config.gemAlertPercent}% price moves ` +
+        `and on *narasi naik* (volume + holder surge).`,
+      md,
+    );
   });
 
   // /watchlist — show watched tokens (premium)
@@ -223,6 +266,65 @@ export function startGemAlertScheduler(bot: Bot, intervalMs = 5 * 60 * 1000): vo
             { parse_mode: 'Markdown' },
           );
           setRef.run(price, w.id);
+        }
+      } catch {
+        /* skip this token on error */
+      }
+    }
+  };
+  setInterval(() => void tick(), intervalMs);
+}
+
+/**
+ * Background loop: alert premium watchers when a token's narrative is rising
+ * ("narasi naik") — i.e. a 24h volume surge AND holder growth at the same time.
+ *
+ * The first time we have data for a token we just record a baseline (no alert).
+ * On a surge we fire one alert, then re-baseline so the next surge is measured
+ * from the new level. A per-token cooldown prevents spam.
+ */
+export function startNarrativeScheduler(bot: Bot, intervalMs = 15 * 60 * 1000): void {
+  const cooldownMs = config.gemNarrativeCooldownHours * 3_600_000;
+
+  const tick = async () => {
+    const rows = allWatch.all() as WatchRow[];
+    for (const w of rows) {
+      try {
+        if (!isPremiumId(w.telegram_id)) continue;
+
+        const p = await fetchToken(w.address, w.chain);
+        if (!p) continue;
+        const vol = Number(p.volume?.h24 ?? 0);
+        const sec = await checkSecurity(w.address, w.chain).catch(() => null);
+        const holders = Number(sec?.holders ?? 0);
+
+        // Initialise the baseline the first time we get usable data.
+        if (!w.ref_volume || !w.ref_holders) {
+          if (vol || holders) {
+            setNarrBaseline.run(vol || w.ref_volume, holders || w.ref_holders, w.narr_alert_at, w.id);
+          }
+          continue;
+        }
+
+        const volChange = ((vol - w.ref_volume) / w.ref_volume) * 100;
+        const holderChange = ((holders - w.ref_holders) / w.ref_holders) * 100;
+        const cooledDown = Date.now() - w.narr_alert_at >= cooldownMs;
+
+        if (
+          volChange >= config.gemVolumeSurgePercent &&
+          holderChange >= config.gemHolderSurgePercent &&
+          cooledDown
+        ) {
+          await bot.api.sendMessage(
+            w.chat_id,
+            `🧠📈 *Narasi naik!* *${w.symbol ?? 'token'}* (${w.chain})\n` +
+              `Volume 24h *+${volChange.toFixed(0)}%* · Holders *+${holderChange.toFixed(0)}%*\n` +
+              `Now $${p.priceUsd ?? '—'} · Vol ${(vol / 1000).toFixed(0)}k · ${holders} holders\n` +
+              `🔬 \`/scan ${w.address}\`\n_Not financial advice — DYOR._`,
+            { parse_mode: 'Markdown' },
+          );
+          // Re-baseline from the new level so the next surge is measured fresh.
+          setNarrBaseline.run(vol, holders, Date.now(), w.id);
         }
       } catch {
         /* skip this token on error */

@@ -30,6 +30,8 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 - 💎 **EVM gems tracker** — `/gem` / `/gems` / `/findtoken`: live price, liquidity, volume, FDV, age via free [DexScreener] API.
 - 🛡 **Honeypot & scam detection** — `/honeypot <address>` simulates a real buy & sell ([honeypot.is]) and reports buy/sell tax, verification, proxy, top-holder %, plus [GoPlus] privileges (mintable, hidden owner, blacklist, pausable).
 - 🔬 **Buy/hold analysis** — `/scan <address>` scores **Safety**, **Momentum**, and **Narrative** (socials, trending, volume surge, holders), then gives a verdict + suggested horizon (scalp hours vs swing days). *Educational only — not financial advice.*
+- 🛡 **Safety auto-scan** — `/safegems` runs **every** trending gem through the full honeypot + contract + analysis pipeline and shows **only the tokens that pass safety** (configurable min Safety score), sorted by combined opportunity. No more scanning each address by hand.
+- 🧠📈 **"Narasi naik" alerts (premium)** — watchlisted tokens are monitored for a **rising narrative**: a simultaneous **24h volume surge + holder growth**. When both fire together you get a "narasi naik" alert (with a built-in cooldown so it never spams).
 
 ---
 
@@ -53,9 +55,9 @@ The gems tracker and safety checks need **no install and no API key** (public De
 **Convert & calculate:** `/convert` `/roman` `/base` `/bmi` `/split` `/pct` `/age` `/datediff` `/color` `/time`
 **Productivity:** `/todo` `/poll` `/countdown` `/pomodoro`
 **Downloaders (yt-dlp):** `/mp3` `/video`
-**EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems`
-**Token safety (honeypot.is + GoPlus):** `/honeypot` `/scan` (safety + buy/hold analysis)
-**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price alerts) · recurring reminders
+**EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems` `/safegems`
+**Token safety (honeypot.is + GoPlus):** `/honeypot` `/scan` (safety + buy/hold analysis) · `/safegems` (auto-scan trending, safe-only)
+**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price + "narasi naik" alerts) · recurring reminders
 
 Send any command with no arguments to see its usage. `/tools` lists everything.
 
