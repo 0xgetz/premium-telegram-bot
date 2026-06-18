@@ -1,19 +1,26 @@
 /**
- * Core "tool" logic. This is the value your bot delivers.
+ * Core "tool" logic — the value your bot delivers.
  *
- * The demo implementation is a template-based marketing-copy generator so the
- * project runs with zero external API keys. Swap `generate()` for your own
- * logic (OpenAI, image generation, scraping, etc.) — the monetization,
+ * Template-based so it runs with zero external API keys. Swap `generate()`
+ * for your own logic (OpenAI, image generation, scraping, etc.); the tiers,
  * quota, and payment layers stay exactly the same.
+ *
+ * Free users get 2 quick variants. Premium users get 6 variants spread across
+ * distinct marketing tones plus a suggested call-to-action — a clear, satisfying
+ * upgrade rather than an artificial wall.
  */
 
-const HOOKS = [
-  'Stop wasting time on {topic} — do it in seconds.',
-  'The {topic} hack nobody is talking about.',
-  'How I 10x my {topic} without burning out.',
-  '{topic}, but actually simple.',
-  'Your {topic} workflow is broken. Here is the fix.',
-  'Most people get {topic} wrong. Here is what works.',
+interface ToneSet {
+  tone: string;
+  templates: string[];
+}
+
+const TONES: ToneSet[] = [
+  { tone: 'Bold', templates: ['Stop wasting time on {t} — do it in seconds.', '{t} is broken. Here is the fix.'] },
+  { tone: 'Curiosity', templates: ['The {t} hack nobody is talking about.', 'Most people get {t} wrong. Here is what works.'] },
+  { tone: 'Aspirational', templates: ['How I 10x my {t} without burning out.', 'Turn {t} into your unfair advantage.'] },
+  { tone: 'Simple', templates: ['{t}, but actually simple.', 'Finally, {t} that just works.'] },
+  { tone: 'Urgency', templates: ['Fix your {t} before your competitors do.', "Your {t} is costing you money right now."] },
 ];
 
 const CTAS = [
@@ -23,25 +30,29 @@ const CTAS = [
   'No credit card required.',
 ];
 
-function pick<T>(arr: T[], n: number): T[] {
-  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+function rand<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
 export interface GenerateResult {
-  premiumOnly: boolean;
   lines: string[];
 }
 
-/** Free version returns a couple of variants; premium returns more + a CTA. */
 export function generate(topic: string, premium: boolean): GenerateResult {
-  const clean = topic.trim() || 'your product';
-  const count = premium ? 5 : 2;
-  const lines = pick(HOOKS, count).map((h) => h.replace(/\{topic\}/g, clean));
+  const t = topic.trim() || 'your product';
 
-  if (premium) {
-    const cta = pick(CTAS, 1)[0];
-    lines.push('', `Suggested CTA: ${cta}`);
+  if (!premium) {
+    // 2 quick, ungrouped variants for the free tier.
+    const picks = [...TONES].sort(() => Math.random() - 0.5).slice(0, 2);
+    const lines = picks.map((p) => rand(p.templates).replace(/\{t\}/g, t));
+    return { lines };
   }
 
-  return { premiumOnly: false, lines };
+  // Premium: one strong line per tone, labeled, plus a CTA.
+  const lines: string[] = [];
+  for (const set of TONES) {
+    lines.push(`*${set.tone}:* ${rand(set.templates).replace(/\{t\}/g, t)}`);
+  }
+  lines.push('', `💡 *Suggested CTA:* ${rand(CTAS)}`);
+  return { lines };
 }

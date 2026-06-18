@@ -6,6 +6,7 @@ import { registerReminderCommands } from './commands/reminders.js';
 import { registerUtilityCommands } from './commands/utilities.js';
 import { registerNotesCommands } from './commands/notes.js';
 import { registerInlineMode } from './commands/inline.js';
+import { registerPaymentCommands } from './commands/payments.js';
 import { registerAdminCommands } from './commands/admin.js';
 import { startReminderScheduler } from './services/reminderService.js';
 
@@ -18,6 +19,7 @@ async function main(): Promise<void> {
   registerUtilityCommands(bot);
   registerNotesCommands(bot);
   registerInlineMode(bot);
+  registerPaymentCommands(bot);
   registerAdminCommands(bot);
 
   bot.catch((err) => {
@@ -32,13 +34,15 @@ async function main(): Promise<void> {
     { command: 'sd', description: 'Self-destructing message' },
     { command: 'save', description: 'Save a personal note' },
     { command: 'notes', description: 'View your notes' },
+    { command: 'find', description: 'Search notes (premium)' },
+    { command: 'status', description: 'Your plan' },
+    { command: 'upgrade', description: 'Go premium' },
     { command: 'help', description: 'Show help' },
   ]);
 
-  // Fire persisted reminders even across restarts.
   startReminderScheduler(bot);
 
-  console.log('🤖 Bot is running (100% free)...');
+  console.log('🤖 Bot is running...');
   await bot.start();
 }
 

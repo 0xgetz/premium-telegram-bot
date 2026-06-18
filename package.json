@@ -1,7 +1,7 @@
 {
-  "name": "free-telegram-bot",
-  "version": "2.0.0",
-  "description": "A 100% free, open-source Telegram bot with rare features most bots don't have: inline mode, natural-language reminders, self-destructing messages, offline QR codes, and personal cross-device notes.",
+  "name": "premium-telegram-bot",
+  "version": "3.0.0",
+  "description": "A feature-rich Telegram bot with a generous free tier and a genuinely compelling premium upgrade. Rare features: inline mode, natural-language & recurring reminders, self-destructing messages, offline QR codes, searchable cross-device notes. Monetized via Telegram Stars and Stripe.",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -12,11 +12,12 @@
   "keywords": [
     "telegram",
     "bot",
-    "free",
-    "open-source",
+    "saas",
+    "subscription",
+    "stripe",
+    "telegram-stars",
     "inline-mode",
     "reminders",
-    "qrcode",
     "typescript",
     "grammy"
   ],
@@ -27,7 +28,8 @@
     "chrono-node": "^2.7.7",
     "dotenv": "^16.4.5",
     "grammy": "^1.30.0",
-    "qrcode": "^1.5.4"
+    "qrcode": "^1.5.4",
+    "stripe": "^16.12.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",

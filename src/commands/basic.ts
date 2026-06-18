@@ -1,5 +1,5 @@
 import { Bot, Context } from 'grammy';
-import { ensureUser } from '../services/userService.js';
+import { ensureUser, isPremium, LIMITS } from '../services/userService.js';
 
 export function registerBasicCommands(bot: Bot): void {
   bot.command('start', async (ctx: Context) => {
@@ -7,24 +7,20 @@ export function registerBasicCommands(bot: Bot): void {
     if (u) ensureUser(u.id, u.username);
     await ctx.reply(
       [
-        '👋 *Welcome!* This bot is *100% free & open-source* — no limits, no paywall.',
+        '👋 *Welcome!* A multi-tool bot with a generous free tier.',
         '',
-        '*✨ Generator*',
-        '/gen <topic> — generate catchy marketing copy',
+        '*✨ Generator* — /gen <topic>',
         '_Tip: works inline too — type_ `@thisbot your topic` _in any chat!_',
         '',
         '*⏰ Reminders* (natural language)',
-        '/remind in 2 hours drink water',
-        '/reminders — manage them',
+        '/remind in 2 hours drink water · /reminders',
         '',
-        '*🧰 Handy tools*',
-        '/qr <text> — generate a QR code',
-        '/sd <seconds> <msg> — self-destructing message',
+        '*🧰 Free tools* — /qr <text> · /sd <seconds> <msg>',
         '',
-        '*📝 Personal notes* (synced across your devices)',
-        '/save <anything> · /notes',
+        '*📝 Notes* (synced across devices) — /save · /notes',
         '',
-        '/help — show this again',
+        `Free: *${LIMITS.FREE_GEN_DAILY} generations/day*, *${LIMITS.FREE_MAX_REMINDERS} reminders*, *${LIMITS.FREE_MAX_NOTES} notes*.`,
+        'Want more? /upgrade for unlimited + premium-only features.',
       ].join('\n'),
       { parse_mode: 'Markdown' },
     );
@@ -34,14 +30,13 @@ export function registerBasicCommands(bot: Bot): void {
     ctx.reply(
       [
         '*Commands*',
-        '/gen <topic> — marketing copy (also inline: `@thisbot topic`)',
+        '/gen <topic> — marketing copy (inline: `@thisbot topic`)',
         '/remind <when> <what> — e.g. `/remind tomorrow at 9am standup`',
-        '/reminders — list & delete reminders',
-        '/qr <text> — QR code image',
-        '/sd <seconds> <msg> — self-destructing message',
-        '/save <text> — save a note · /notes — view notes',
-        '',
-        'Everything is free and unlimited. 💚',
+        '/reminders — manage reminders',
+        '/qr <text> — QR code · /sd <seconds> <msg> — self-destruct',
+        '/save <text> · /notes — personal notes',
+        '/find <keyword> — search notes _(premium)_',
+        '/status — your plan · /upgrade — go premium',
       ].join('\n'),
       { parse_mode: 'Markdown' },
     ),
@@ -51,8 +46,18 @@ export function registerBasicCommands(bot: Bot): void {
     const u = ctx.from;
     if (!u) return;
     const user = ensureUser(u.id, u.username);
+    if (isPremium(user)) {
+      const until = user.premium_until
+        ? new Date(user.premium_until).toISOString().slice(0, 10)
+        : 'lifetime';
+      return ctx.reply(`✨ *Premium active* (until ${until}). Everything unlimited.`, {
+        parse_mode: 'Markdown',
+      });
+    }
+    const now = Date.now();
+    const used = now >= user.gen_reset_at ? 0 : user.gen_used;
     return ctx.reply(
-      `💚 *Free plan — unlimited.*\nYou've used the bot *${user.usage_count}* times. Thanks for being here!`,
+      `🆓 *Free plan*\nGenerations today: ${Math.max(0, LIMITS.FREE_GEN_DAILY - used)}/${LIMITS.FREE_GEN_DAILY}\nUpgrade for unlimited + premium features → /upgrade`,
       { parse_mode: 'Markdown' },
     );
   });

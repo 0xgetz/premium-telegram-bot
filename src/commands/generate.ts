@@ -1,5 +1,5 @@
 import { Bot } from 'grammy';
-import { trackUsage } from '../services/userService.js';
+import { consumeGenQuota } from '../services/userService.js';
 import { generate } from '../services/featureService.js';
 
 export function registerGenerateCommand(bot: Bot): void {
@@ -12,8 +12,19 @@ export function registerGenerateCommand(bot: Bot): void {
       return ctx.reply('Usage: `/gen <your topic>`', { parse_mode: 'Markdown' });
     }
 
-    trackUsage(u.id, u.username);
-    const result = generate(topic, true); // everything unlocked, free
-    await ctx.reply(result.lines.join('\n') + '\n\n💚 100% free & unlimited');
+    const quota = consumeGenQuota(u.id, u.username);
+    if (!quota.allowed) {
+      return ctx.reply(
+        '🚫 You hit your free daily limit (10/day).\n\nUpgrade to *premium* for unlimited generations + 6 multi-tone variants and CTA ideas → /upgrade',
+        { parse_mode: 'Markdown' },
+      );
+    }
+
+    const result = generate(topic, quota.premium);
+    const footer = quota.premium
+      ? '\n\n✨ Premium • unlimited • multi-tone'
+      : `\n\n🆓 ${quota.remaining}/${quota.limit} left today • /upgrade for unlimited + premium variants`;
+
+    await ctx.reply(result.lines.join('\n') + footer, { parse_mode: 'Markdown' });
   });
 }
