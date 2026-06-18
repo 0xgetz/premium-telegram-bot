@@ -47,8 +47,37 @@ db.exec(`
     created_at   INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS todos (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    telegram_id  INTEGER NOT NULL,
+    text         TEXT NOT NULL,
+    done         INTEGER NOT NULL DEFAULT 0,
+    created_at   INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS habits (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    telegram_id  INTEGER NOT NULL,
+    name         TEXT NOT NULL,
+    streak       INTEGER NOT NULL DEFAULT 0,
+    best         INTEGER NOT NULL DEFAULT 0,
+    last_done    INTEGER,
+    created_at   INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS expenses (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    telegram_id  INTEGER NOT NULL,
+    amount       REAL NOT NULL,
+    note         TEXT,
+    created_at   INTEGER NOT NULL
+  );
+
   CREATE INDEX IF NOT EXISTS idx_reminders_pending ON reminders (fired, fire_at);
   CREATE INDEX IF NOT EXISTS idx_notes_user ON notes (telegram_id, created_at);
+  CREATE INDEX IF NOT EXISTS idx_todos_user ON todos (telegram_id, done);
+  CREATE INDEX IF NOT EXISTS idx_habits_user ON habits (telegram_id);
+  CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses (telegram_id, created_at);
 `);
 
 export interface UserRow {

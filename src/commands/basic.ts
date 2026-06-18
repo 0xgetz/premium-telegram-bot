@@ -42,6 +42,35 @@ export function registerBasicCommands(bot: Bot): void {
     ),
   );
 
+  bot.command('tools', (ctx) =>
+    ctx.reply(
+      [
+        '*🧰 All tools*',
+        '',
+        '*✍️ Text & encoding*',
+        '/calc · /b64 · /unb64 · /hash · /case · /reverse · /count · /morse · /rot13 · /slug · /json',
+        '',
+        '*🎲 Generators*',
+        '/pw · /uuid · /lorem · /pick · /roll · /flip',
+        '',
+        '*🔄 Convert & calculate*',
+        '/convert · /roman · /base · /bmi · /split · /pct · /age · /datediff · /color · /time',
+        '',
+        '*✅ Productivity*',
+        '/todo · /poll · /countdown · /pomodoro',
+        '',
+        '*⏰ Core*',
+        '/gen · /remind · /reminders · /qr · /sd · /save · /notes',
+        '',
+        '*✨ Premium*',
+        '/habit · /spend · /expenses · /find · recurring reminders · unlimited everything',
+        '',
+        'Tip: most tools show usage if you send them with no arguments.',
+      ].join('\n'),
+      { parse_mode: 'Markdown' },
+    ),
+  );
+
   bot.command('status', (ctx) => {
     const u = ctx.from;
     if (!u) return;

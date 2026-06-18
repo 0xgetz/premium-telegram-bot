@@ -29,6 +29,16 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 
 ---
 
+## 🧰 30+ built-in tools (all offline, no paid APIs)
+
+**Text & encoding:** `/calc` `/b64` `/unb64` `/hash` `/case` `/reverse` `/count` `/morse` `/rot13` `/slug` `/json`
+**Generators:** `/pw` `/uuid` `/lorem` `/pick` `/roll` `/flip`
+**Convert & calculate:** `/convert` `/roman` `/base` `/bmi` `/split` `/pct` `/age` `/datediff` `/color` `/time`
+**Productivity:** `/todo` `/poll` `/countdown` `/pomodoro`
+**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · recurring reminders
+
+Send any command with no arguments to see its usage. `/tools` lists everything.
+
 ## Quick start
 
 ```bash
