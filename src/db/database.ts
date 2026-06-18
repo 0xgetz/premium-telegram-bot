@@ -92,6 +92,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_watchlist_user ON watchlist (telegram_id);
 `);
 
+// --- lightweight migrations (add columns introduced after the initial release) ---
+function ensureColumn(table: string, column: string, ddl: string): void {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${ddl}`);
+  }
+}
+
+// Narrative-surge tracking for premium watchlist alerts ("narasi naik").
+ensureColumn('watchlist', 'ref_volume', 'ref_volume REAL NOT NULL DEFAULT 0');
+ensureColumn('watchlist', 'ref_holders', 'ref_holders INTEGER NOT NULL DEFAULT 0');
+ensureColumn('watchlist', 'narr_alert_at', 'narr_alert_at INTEGER NOT NULL DEFAULT 0');
+
 export interface UserRow {
   telegram_id: number;
   username: string | null;

@@ -14,7 +14,7 @@ import { registerConvertTools } from './commands/tools/convert.js';
 import { registerProductivity } from './commands/productivity.js';
 import { registerPremiumTools } from './commands/premiumTools.js';
 import { registerMediaCommands } from './commands/media.js';
-import { registerGemCommands, startGemAlertScheduler } from './commands/gems.js';
+import { registerGemCommands, startGemAlertScheduler, startNarrativeScheduler } from './commands/gems.js';
 import { startReminderScheduler } from './services/reminderService.js';
 
 async function main(): Promise<void> {
@@ -55,6 +55,7 @@ async function main(): Promise<void> {
     { command: 'scan', description: 'Honeypot + buy/hold analysis' },
     { command: 'honeypot', description: 'Quick can-I-sell check' },
     { command: 'gems', description: 'Trending EVM gems' },
+    { command: 'safegems', description: 'Trending gems that pass safety' },
     { command: 'remind', description: 'Set a reminder (natural language)' },
     { command: 'todo', description: 'To-do list' },
     { command: 'calc', description: 'Calculator' },
@@ -67,6 +68,7 @@ async function main(): Promise<void> {
 
   startReminderScheduler(bot);
   startGemAlertScheduler(bot);
+  startNarrativeScheduler(bot);
 
   console.log('🤖 Bot is running...');
   await bot.start();
