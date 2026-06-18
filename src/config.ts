@@ -12,6 +12,10 @@ export const config = {
   botToken: required('BOT_TOKEN'),
   databasePath: process.env.DATABASE_PATH ?? './data/bot.db',
   premiumStarsPrice: Number(process.env.PREMIUM_STARS_PRICE ?? 250),
+  // Max size (MB) for downloads — Telegram bots can send up to ~50MB.
+  maxDownloadMb: Number(process.env.MAX_DOWNLOAD_MB ?? 49),
+  // Price move (%) that triggers a watchlist alert.
+  gemAlertPercent: Number(process.env.GEM_ALERT_PERCENT ?? 20),
   adminIds: (process.env.ADMIN_IDS ?? '')
     .split(',')
     .map((id) => id.trim())

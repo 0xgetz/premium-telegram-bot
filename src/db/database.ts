@@ -73,11 +73,23 @@ db.exec(`
     created_at   INTEGER NOT NULL
   );
 
+  CREATE TABLE IF NOT EXISTS watchlist (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    telegram_id  INTEGER NOT NULL,
+    chat_id      INTEGER NOT NULL,
+    chain        TEXT NOT NULL,
+    address      TEXT NOT NULL,
+    symbol       TEXT,
+    ref_price    REAL NOT NULL,
+    created_at   INTEGER NOT NULL
+  );
+
   CREATE INDEX IF NOT EXISTS idx_reminders_pending ON reminders (fired, fire_at);
   CREATE INDEX IF NOT EXISTS idx_notes_user ON notes (telegram_id, created_at);
   CREATE INDEX IF NOT EXISTS idx_todos_user ON todos (telegram_id, done);
   CREATE INDEX IF NOT EXISTS idx_habits_user ON habits (telegram_id);
   CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses (telegram_id, created_at);
+  CREATE INDEX IF NOT EXISTS idx_watchlist_user ON watchlist (telegram_id);
 `);
 
 export interface UserRow {

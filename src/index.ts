@@ -13,6 +13,8 @@ import { registerGeneratorTools } from './commands/tools/generators.js';
 import { registerConvertTools } from './commands/tools/convert.js';
 import { registerProductivity } from './commands/productivity.js';
 import { registerPremiumTools } from './commands/premiumTools.js';
+import { registerMediaCommands } from './commands/media.js';
+import { registerGemCommands, startGemAlertScheduler } from './commands/gems.js';
 import { startReminderScheduler } from './services/reminderService.js';
 
 async function main(): Promise<void> {
@@ -35,6 +37,10 @@ async function main(): Promise<void> {
   registerProductivity(bot);
   registerPremiumTools(bot);
 
+  // Media downloaders + EVM gems tracker
+  registerMediaCommands(bot);
+  registerGemCommands(bot);
+
   bot.catch((err) => {
     console.error('Bot error:', err.error);
   });
@@ -43,19 +49,22 @@ async function main(): Promise<void> {
     { command: 'start', description: 'Welcome & overview' },
     { command: 'tools', description: 'List every tool' },
     { command: 'gen', description: 'Generate marketing copy' },
+    { command: 'mp3', description: 'Download audio from a link' },
+    { command: 'video', description: 'Download a video from a link' },
+    { command: 'gem', description: 'EVM token stats (gems tracker)' },
+    { command: 'gems', description: 'Trending EVM gems' },
     { command: 'remind', description: 'Set a reminder (natural language)' },
     { command: 'todo', description: 'To-do list' },
     { command: 'calc', description: 'Calculator' },
-    { command: 'convert', description: 'Unit converter' },
     { command: 'qr', description: 'Generate a QR code' },
-    { command: 'poll', description: 'Create a poll' },
-    { command: 'habit', description: 'Habit streaks (premium)' },
+    { command: 'watch', description: 'Watch a token for alerts (premium)' },
     { command: 'status', description: 'Your plan' },
     { command: 'upgrade', description: 'Go premium' },
     { command: 'help', description: 'Show help' },
   ]);
 
   startReminderScheduler(bot);
+  startGemAlertScheduler(bot);
 
   console.log('🤖 Bot is running...');
   await bot.start();

@@ -35,7 +35,9 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 **Generators:** `/pw` `/uuid` `/lorem` `/pick` `/roll` `/flip`
 **Convert & calculate:** `/convert` `/roman` `/base` `/bmi` `/split` `/pct` `/age` `/datediff` `/color` `/time`
 **Productivity:** `/todo` `/poll` `/countdown` `/pomodoro`
-**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · recurring reminders
+**Downloaders (yt-dlp):** `/mp3` `/video`
+**EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems`
+**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price alerts) · recurring reminders
 
 Send any command with no arguments to see its usage. `/tools` lists everything.
 
@@ -122,4 +124,7 @@ npm run build && npm start
 
 MIT — see [LICENSE](./LICENSE).
 
+[chrono-node]: https://github.com/wanasit/chrono
 [@BotFather]: https://t.me/BotFather
+[yt-dlp]: https://github.com/yt-dlp/yt-dlp
+[DexScreener]: https://docs.dexscreener.com/api/reference
