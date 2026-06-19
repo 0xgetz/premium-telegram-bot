@@ -15,6 +15,7 @@ import { registerProductivity } from './commands/productivity.js';
 import { registerPremiumTools } from './commands/premiumTools.js';
 import { registerMediaCommands } from './commands/media.js';
 import { registerGemCommands, startGemAlertScheduler, startNarrativeScheduler } from './commands/gems.js';
+import { registerSniperCommands, startSniperScheduler } from './commands/sniper.js';
 import { startReminderScheduler } from './services/reminderService.js';
 
 async function main(): Promise<void> {
@@ -37,9 +38,10 @@ async function main(): Promise<void> {
   registerProductivity(bot);
   registerPremiumTools(bot);
 
-  // Media downloaders + EVM gems tracker
+  // Media downloaders + EVM gems tracker + launch sniffer
   registerMediaCommands(bot);
   registerGemCommands(bot);
+  registerSniperCommands(bot);
 
   bot.catch((err) => {
     console.error('Bot error:', err.error);
@@ -56,6 +58,8 @@ async function main(): Promise<void> {
     { command: 'honeypot', description: 'Quick can-I-sell check' },
     { command: 'gems', description: 'Trending EVM gems' },
     { command: 'safegems', description: 'Trending gems that pass safety' },
+    { command: 'fresh', description: 'Sniff newest launches (safe-only)' },
+    { command: 'snipe', description: 'Always-on launch sniper (premium)' },
     { command: 'remind', description: 'Set a reminder (natural language)' },
     { command: 'todo', description: 'To-do list' },
     { command: 'calc', description: 'Calculator' },
@@ -69,6 +73,7 @@ async function main(): Promise<void> {
   startReminderScheduler(bot);
   startGemAlertScheduler(bot);
   startNarrativeScheduler(bot);
+  startSniperScheduler(bot);
 
   console.log('🤖 Bot is running...');
   await bot.start();

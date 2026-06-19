@@ -24,6 +24,17 @@ export const config = {
   gemHolderSurgePercent: Number(process.env.GEM_HOLDER_SURGE_PERCENT ?? 15),
   // Minimum hours between narrative alerts for the same token (anti-spam).
   gemNarrativeCooldownHours: Number(process.env.GEM_NARRATIVE_COOLDOWN_HOURS ?? 6),
+  // --- Launch sniffer (Trojan-style new-pair radar) ---
+  // Default minimum Safety score (0-100) a fresh launch must clear to be sniffed.
+  sniperMinSafety: Number(process.env.SNIPER_MIN_SAFETY ?? 65),
+  // Default minimum liquidity (USD).
+  sniperMinLiquidity: Number(process.env.SNIPER_MIN_LIQUIDITY ?? 15000),
+  // Default minimum 24h volume (USD).
+  sniperMinVolume: Number(process.env.SNIPER_MIN_VOLUME ?? 10000),
+  // Only consider pairs created within this many minutes (0 = no age cap).
+  sniperMaxAgeMin: Number(process.env.SNIPER_MAX_AGE_MIN ?? 180),
+  // How often the radar polls for new launches (seconds).
+  sniperPollSeconds: Number(process.env.SNIPER_POLL_SECONDS ?? 120),
   adminIds: (process.env.ADMIN_IDS ?? '')
     .split(',')
     .map((id) => id.trim())
