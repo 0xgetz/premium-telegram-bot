@@ -100,7 +100,9 @@ export function passes(pair: Pair, a: Analysis, ageMin: number | null, f: Sniper
   if (a.safety < f.minSafety) return false;
   if ((pair.liquidity?.usd ?? 0) < f.minLiquidity) return false;
   if ((pair.volume?.h24 ?? 0) < f.minVolume) return false;
-  if (f.maxAgeMin > 0 && ageMin !== null && ageMin > f.maxAgeMin) return false;
+  // When an age cap is set, only surface genuinely fresh launches. Tokens whose
+  // creation time is unknown are skipped so the radar never alerts on old pairs.
+  if (f.maxAgeMin > 0 && (ageMin === null || ageMin > f.maxAgeMin)) return false;
   return true;
 }
 
