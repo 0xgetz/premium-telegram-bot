@@ -105,6 +105,31 @@ ensureColumn('watchlist', 'ref_volume', 'ref_volume REAL NOT NULL DEFAULT 0');
 ensureColumn('watchlist', 'ref_holders', 'ref_holders INTEGER NOT NULL DEFAULT 0');
 ensureColumn('watchlist', 'narr_alert_at', 'narr_alert_at INTEGER NOT NULL DEFAULT 0');
 
+// Launch sniffer ("sniper") — per-user radar config + per-user de-dupe of alerts.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS sniper_config (
+    telegram_id    INTEGER PRIMARY KEY,
+    chat_id        INTEGER NOT NULL,
+    enabled        INTEGER NOT NULL DEFAULT 0,
+    chains         TEXT,                  -- csv of chain ids; null = all EVM
+    min_safety     INTEGER NOT NULL,
+    min_liquidity  REAL NOT NULL,
+    min_volume     REAL NOT NULL,
+    max_age_min    INTEGER NOT NULL,
+    created_at     INTEGER NOT NULL,
+    updated_at     INTEGER NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS sniper_seen (
+    telegram_id  INTEGER NOT NULL,
+    address      TEXT NOT NULL,
+    created_at   INTEGER NOT NULL,
+    PRIMARY KEY (telegram_id, address)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_sniper_seen_age ON sniper_seen (created_at);
+`);
+
 export interface UserRow {
   telegram_id: number;
   username: string | null;
