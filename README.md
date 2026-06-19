@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.jpg" alt="Premium Telegram Bot" width="340">
+</p>
+
 # Premium Telegram Bot 🤖✨
 
 A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and a **genuinely compelling premium upgrade** — not an artificial paywall. It ships with features that are **rare in other bots** and two payment rails: **Telegram Stars** (in-app, zero setup) and **Stripe** (card subscriptions).
