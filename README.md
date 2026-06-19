@@ -32,6 +32,7 @@ A feature-rich Telegram bot in **TypeScript** with a **generous free tier** and 
 - 🔬 **Buy/hold analysis** — `/scan <address>` scores **Safety**, **Momentum**, and **Narrative** (socials, trending, volume surge, holders), then gives a verdict + suggested horizon (scalp hours vs swing days). *Educational only — not financial advice.*
 - 🛡 **Safety auto-scan** — `/safegems` runs **every** trending gem through the full honeypot + contract + analysis pipeline and shows **only the tokens that pass safety** (configurable min Safety score), sorted by combined opportunity. No more scanning each address by hand.
 - 🧠📈 **"Narasi naik" alerts (premium)** — watchlisted tokens are monitored for a **rising narrative**: a simultaneous **24h volume surge + holder growth**. When both fire together you get a "narasi naik" alert (with a built-in cooldown so it never spams).
+- 🎯 **Launch sniffer / sniper** — a modern, Trojan-style **new-pair radar**. `/fresh` does a one-off scan of the newest launches and shows only the ones that pass safety; `/snipe` (premium) is an **always-on radar** with per-user filters (min Safety, liquidity, volume, max age, chains) that DMs you the instant a fresh launch clears your rules — de-duplicated per user. *Detection + alerting only: it does **not** execute on-chain trades (no wallet/custody in this codebase). Not financial advice.*
 
 ---
 
@@ -55,9 +56,10 @@ The gems tracker and safety checks need **no install and no API key** (public De
 **Convert & calculate:** `/convert` `/roman` `/base` `/bmi` `/split` `/pct` `/age` `/datediff` `/color` `/time`
 **Productivity:** `/todo` `/poll` `/countdown` `/pomodoro`
 **Downloaders (yt-dlp):** `/mp3` `/video`
-**EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems` `/safegems`
-**Token safety (honeypot.is + GoPlus):** `/honeypot` `/scan` (safety + buy/hold analysis) · `/safegems` (auto-scan trending, safe-only)
-**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price + "narasi naik" alerts) · recurring reminders
+**EVM gems tracker (DexScreener):** `/gem` `/findtoken` `/gems` `/safegems` `/fresh`
+**Token safety (honeypot.is + GoPlus):** `/honeypot` `/scan` (safety + buy/hold analysis) · `/safegems` (auto-scan trending, safe-only) · `/fresh` (sniff newest launches, safe-only)
+**Launch sniffer (DexScreener radar):** `/fresh` (manual) · `/snipe` (always-on custom radar, premium)
+**Premium extras:** `/habit` (streak tracker) · `/spend` + `/expenses` (expense tracker) · `/find` (note search) · `/watch` + `/watchlist` (token price + "narasi naik" alerts) · `/snipe` (launch sniper) · recurring reminders
 
 Send any command with no arguments to see its usage. `/tools` lists everything.
 
